@@ -1,7 +1,7 @@
 # Connect 4
 
 ## Description
-Connect 4 is a two-player zero-sume connection game. For more details on rules, please refer to: https://en.wikipedia.org/wiki/Connect_Four
+Connect 4 is a two-player zero-sum connection game. For more details on rules, please refer to: https://en.wikipedia.org/wiki/Connect_Four
 
 ![Connect4](https://i.imgur.com/MibgAOA.png)
 
