@@ -4,16 +4,17 @@
  * 
  */
 
-
 package controller;
 
 import model.Connect4Model;
 
 public class Connect4Controller {
-	private Connect4Model gameModel;
+
+	private final Connect4Model gameModel;
 	
-	public Connect4Controller(Connect4Model model) {
-		gameModel = model;
+	public Connect4Controller(final Connect4Model model) {
+
+		this.gameModel = model;
 	}
 	
 	/**
@@ -22,24 +23,24 @@ public class Connect4Controller {
 	 * @return A string representing the board.
 	 */
 	public String gameBoardToString() {
-		String boardString = "";
+		StringBuilder boardString = new StringBuilder();
 		int max_row = gameModel.getMaxRow();
 		int max_col = gameModel.getMaxCol();
 		
 		for (int j = max_col-1; j >= 0; j--) {
 			for (int i = 0; i < max_row; i++) {
 				try {
-					boardString += gameModel.getObjectAt(i, j) + " ";
+					boardString.append(gameModel.getObjectAt(i, j)).append(" ");
 				} catch (model.IllegalArgumentException e) {
 					// It's guaranteed that the try block always succeed.
 				}
 			}
-			boardString += "\n";
+			boardString.append("\n");
 		}
 		
-		boardString += "0 1 2 3 4 5 6\n";
+		boardString.append("0 1 2 3 4 5 6\n");
 		
-		return boardString;
+		return boardString.toString();
 	}
 	
 	/**

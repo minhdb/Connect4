@@ -23,7 +23,6 @@ import model.Connect4MoveMessage;
 import model.IllegalArgumentException;
 import model.Minimax_AlphaBeta;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
@@ -66,7 +65,7 @@ public class Connect4 extends Application implements Runnable {
 	 * @param primaryStage the window of the GUI
 	 */
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) {
 		boolean foundSerializedFile = this.deserializeGameModel();
 		if (!foundSerializedFile) {
 			initGame();
@@ -212,7 +211,7 @@ public class Connect4 extends Application implements Runnable {
 	/**
 	 * This method is to set the GUI to the center of the pane
 	 * 
-	 * @param newView
+	 * @param newView Passing a new view to
 	 */
 	private void setViewTo(Observer newView) {
 		window.setCenter(null);
