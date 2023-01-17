@@ -13,11 +13,6 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Representation of the board.
-	 */
-	private char[][] board;
-
-	/**
 	 * The maximum size for each rows.
 	 */
 	private final int ROWS_NUM = 7;
@@ -32,11 +27,6 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	 * diagonally to win the game.
 	 */
 	private final int CONNECT_SIZE = 4;
-
-	/**
-	 * Indicates if it's currently the human turn.
-	 */
-	private boolean isHumanMove;
 
 	/**
 	 * The default character representation of the player.
@@ -59,18 +49,30 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	private transient ComputerPlayer computerPlayer;
 
 	/**
+	 * Encapsulate move information to send over to the views.
+	 */
+	private transient Connect4MoveMessage moveMsg;
+
+	/**
+	 * Indicates if it's currently the human turn.
+	 */
+	private boolean isHumanMove;
+
+	/**
 	 * Counts the total number of moves that have been made.
 	 */
 	private int moveMaked;
 
 	/**
-	 * Encapsulate move information to send over to the views.
+	 * Representation of the board.
 	 */
-	private transient Connect4MoveMessage moveMsg;
+	private char[][] board;
 
-
-	
+	/**
+	 * Ctor for Connect4Model.
+	 */
 	public Connect4Model() {
+
 		board = new char[ROWS_NUM][COLS_NUM];
 		for (int i = 0; i < ROWS_NUM; i++) {
 			for (int j = 0; j < COLS_NUM; j++) {
@@ -80,30 +82,13 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 
 		// Human moves first by default.
 		isHumanMove = true;
-		// computerPlayer = new RandomAI();
 		computerPlayer = new Minimax_AlphaBeta();
 		moveMaked = 0;
 		moveMsg = null;
+
 		setChanged();
 		notifyObservers(moveMsg);
 	}
-/*
-	public void newGame() {
-		board = new char[ROWS_NUM][COLS_NUM];
-		for (int i = 0; i < ROWS_NUM; i++) {
-			for (int j = 0; j < COLS_NUM; j++) {
-				board[i][j] = blankChar;
-			}
-		}
-		// Human moves first by default.
-		isHumanMove = true;
-		// computerPlayer = new RandomAI();
-		computerPlayer = new Minimax_AlphaBeta();
-		moveMaked = 0;
-		moveMsg = new Connect4MoveMessage();
-		setChanged();
-		notifyObservers(moveMsg);
-	}*/
 
 	public void setComputerPlayer(ComputerPlayer another) {
 		this.computerPlayer = another;
@@ -118,10 +103,14 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	 * @throws IllegalArgumentException when x is not between 0 and ROWS_NUM or y is
 	 *                                  not between 0 and COLS_NUM.
 	 */
-	public char getObjectAt(int x, int y) throws model.IllegalArgumentException {
-		if ((x >= this.ROWS_NUM || x < 0) || (y >= this.COLS_NUM || y < 0)) {
+	public char getObjectAt(final int x, final int y) throws model.IllegalArgumentException {
+
+		if ( (x >= this.ROWS_NUM || x < 0) ||
+				(y >= this.COLS_NUM || y < 0)) {
+
 			throw new model.IllegalArgumentException("Invalid arguments.");
 		}
+
 		return this.board[x][y];
 	}
 
@@ -134,15 +123,22 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	 * @throws IllegalArgumentException when x is not between 0 and ROWS_NUM or y is
 	 *                                  not between 0 and COLS_NUM.
 	 */
-	public void setObjectAt(int x, int y, char obj) throws model.IllegalArgumentException {
+	public void setObjectAt(final int x, final int y, final char obj) throws model.IllegalArgumentException {
 		if ((x >= this.ROWS_NUM || x < 0) || (y >= this.COLS_NUM || y < 0)) {
+
 			throw new model.IllegalArgumentException("Invalid arguments.");
 		}
+
 		this.board[x][y] = obj;
-		if (obj == this.getComputerChar()) { 
+
+		if (obj == this.getComputerChar()) {
+
 			moveMsg = new Connect4MoveMessage(this.board[0].length - y - 1, x , 2);
-		} else 
+		} else {
+
 			moveMsg = new Connect4MoveMessage(this.board[0].length - y - 1, x , 1);
+		}
+
 		setChanged();
 		notifyObservers(moveMsg);
 	}
@@ -154,7 +150,7 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	 * @param y stand for column
 	 * @return true if the cell (x,y) is empty.
 	 */
-	public boolean isBlank(int x, int y) {
+	public boolean isBlank(final int x, final int y) {
 		return this.board[x][y] == blankChar;
 	}
 
@@ -212,14 +208,22 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 		return this.isHumanMove;
 	}
 
-	public void setHumanTurn(boolean isHumanTurn) {
-		isHumanMove = isHumanTurn;
+	/**
+	 * Set the flag for human turn.
+	 *
+	 * @param isHumanTurn Set isHumanMove to true if this is true and false otherwise.
+	 */
+	public void setHumanTurn(final boolean isHumanTurn) {
+		this.isHumanMove = isHumanTurn;
 	}
 
+	/**
+	 * A helper method to switch turn in a single game.
+	 */
 	public void switchTurn() {
+
 		this.moveMaked++;
 		isHumanMove = !isHumanMove;
-		// this.notifyObservers();
 	}
 
 	/**
@@ -228,20 +232,30 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	 * @param playerChar A character that represents the player.
 	 * @return True if playerChar wins the game by column and false otherwise.
 	 */
-	public boolean wonByCol(char playerChar) {
+	public boolean wonByCol(final char playerChar) {
+
+		boolean won = false;
+
 		for (int i = 0; i < ROWS_NUM; i++) {
+
 			int colSum = 0;
 			for (int j = 0; j < COLS_NUM; j++) {
-				if (board[i][j] == playerChar) {
-					colSum++;
-					if (colSum == CONNECT_SIZE)
-						return true;
-				} else
-					colSum = 0;
 
+				if (board[i][j] == playerChar) {
+
+					colSum++;
+					if (colSum == CONNECT_SIZE) {
+
+						won = true;
+						break;
+					}
+				} else {
+					colSum = 0;
+				}
 			}
 		}
-		return false;
+
+		return won;
 	}
 
 	/**
@@ -250,19 +264,30 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	 * @param playerChar A character that represents the player.
 	 * @return True if playerChar wins the game by row and false otherwise.
 	 */
-	public boolean wonByRow(char playerChar) {
+	public boolean wonByRow(final char playerChar) {
+
+		boolean won = false;
+
 		for (int i = 0; i < COLS_NUM; i++) {
+
 			int rowSum = 0;
 			for (int j = 0; j < ROWS_NUM; j++) {
+
 				if (board[j][i] == playerChar) {
+
 					rowSum++;
-					if (rowSum == CONNECT_SIZE)
-						return true;
-				} else
+					if (rowSum == CONNECT_SIZE) {
+
+						won = true;
+						break;
+					}
+				} else {
+
 					rowSum = 0;
+				}
 			}
 		}
-		return false;
+		return won;
 	}
 
 	/**
@@ -271,17 +296,21 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	 * @param playerChar A character that represents the player.
 	 * @return True if playerChar wins the game diagonally and false otherwise.
 	 */
-	public boolean wonByDiagonal(char playerChar) {
+	public boolean wonByDiagonal(final char playerChar) {
 		int sum = 0;
+		boolean won = false;
 
 		// Covering from left to right.
 		for (int i = 3; i < ROWS_NUM; i++) {
 			sum = 0;
 			for (int j = 0; j < COLS_NUM && j <= i; j++) {
 				if (board[i - j][j] == playerChar) {
+
 					sum++;
-					if (sum == CONNECT_SIZE)
-						return true;
+					if (sum == CONNECT_SIZE) {
+						won = true;
+						break;
+					}
 				} else {
 					sum = 0;
 				}
@@ -289,16 +318,19 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 		}
 
 		for (int j = 1; j < 3; j++) {
+
 			sum = 0;
 			for (int k = 0; j + k < COLS_NUM; k++) {
-				// System.out.println(ROWS_NUM - 1 - k + " " + (j + k));
+
 				if (board[ROWS_NUM - 1 - k][j + k] == playerChar) {
 					sum++;
-					if (sum == CONNECT_SIZE)
-						return true;
-
-				} else
+					if (sum == CONNECT_SIZE) {
+						won = true;
+						break;
+					}
+				} else {
 					sum = 0;
+				}
 			}
 		}
 
@@ -307,10 +339,11 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 			sum = 0;
 			for (int j = 0; j < COLS_NUM && (i + j) < ROWS_NUM; j++) {
 				if (board[i + j][j] == playerChar) {
-					// System.out.println(i + j + " " + j);
 					sum++;
-					if (sum == CONNECT_SIZE)
-						return true;
+					if (sum == CONNECT_SIZE) {
+						won = true;
+						break;
+					}
 				} else {
 					sum = 0;
 				}
@@ -322,13 +355,16 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 			for (int k = 0; j + k < COLS_NUM; k++) {
 				if (board[0 + k][j + k] == playerChar) {
 					sum++;
-					if (sum == CONNECT_SIZE)
-						return true;
-				} else
+					if (sum == CONNECT_SIZE) {
+						won = true;
+						break;
+					}
+				} else {
 					sum = 0;
+				}
 			}
 		}
-		return false;
+		return won;
 	}
 
 	/**
@@ -350,13 +386,6 @@ public class Connect4Model extends java.util.Observable implements java.io.Seria
 	public boolean isTied() {
 		// Tie condition: Out of moves AND nobody wins.
 		return (moveMaked == ROWS_NUM * COLS_NUM && !(didWin(computerChar) || didWin(humanChar)));
-		// Board is filled.
-		/*
-		 * boolean isFilled = true; for (int i = 0; i < board.length; i++) { for (int j
-		 * = 0; j < board[0].length; j++) { if (board[i][j] == '_') { isFilled = false;
-		 * break; } } } return (isFilled && !(didWin(computerChar) ||
-		 * didWin(humanChar)));
-		 */
 	}
 
 	/**
